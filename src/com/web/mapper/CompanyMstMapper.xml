@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.web.dao.CompanyMstMapper">
+	<select id="selectCmpForList" resultType="com.web.entity.CompanyMst">
+		select cmpid,cmpname from tblCompanyMst 
+		where  deleteflag is null or  deleteflag = 0 
+		order by cmpid
+	</select>
+	
+	<select id="selectCmpAll" resultType="com.web.entity.CompanyMst">
+		select	cmpid
+				,cmpname
+				,contacts
+				,tel
+				,fax
+				,address
+				,deleteflag 
+		from tblCompanyMst
+		where deleteflag is null or  deleteflag = 0 
+	</select>
+	
+	<select id="selectCmpById" parameterType="string" 
+			resultType="com.web.entity.CompanyMst">
+		select	cmpid
+				,cmpname
+				,contacts
+				,tel
+				,fax
+				,address
+				,deleteflag 
+		from tblCompanyMst
+		where cmpid =#{cmpid}
+			and (deleteflag is null or  deleteflag = 0 	)
+	</select>
+	
+	<select id="findCmpById" parameterType="string" 
+			resultType="com.web.entity.CompanyMst">
+		select	cmpid
+				,cmpname
+				,contacts
+				,tel
+				,fax
+				,address
+				,deleteflag 
+		from tblCompanyMst
+		where cmpid =#{cmpid}
+	</select>
+	
+	<insert id="insertCmp" parameterType="com.web.entity.dto.CmpAddUpdDto">
+		insert into tblCompanyMst(cmpid,cmpname	,contacts,tel,fax,address,deleteflag )
+		values(#{cmpid},#{cmpname},#{contacts},#{tel},#{fax},#{address},0)
+	</insert>
+	
+	<update id="updateCmp" parameterType="com.web.entity.dto.CmpAddUpdDto">
+		update tblCompanyMst
+		set		cmpname  = #{cmpname}
+				,contacts  = #{contacts}
+				,tel  = #{tel}
+				,fax  = #{fax}
+				,address  = #{address}
+	    where cmpid = #{cmpid}
+	</update>
+	
+	<update id="deleteCmpList" parameterType="list">
+		update tblCompanyMst 
+		set deleteflag = 1
+		<where>
+			<foreach collection="array" item="cmpidx" 
+				open=" cmpid in (" close=")" separator=",">
+				#{cmpidx}
+			</foreach>
+		</where> 
+	</update>
+	
+	<update id="deleteCmp" parameterType="string">
+		update tblCompanyMst 
+		set deleteflag = 1
+		where cmpid= #{cmpid}
+	</update>
+	
+	<select id="selectAcount" parameterType ="com.web.entity.dto.CompanyMainDto" 
+		resultType = "int">
+		select count(cmpid) 
+		from tblCompanyMst 
+		<where>
+			<if test="cmpId != null and  cmpId !='' ">
+				and cmpid = #{cmpId}
+			</if>
+			<if test="cmpName != null and  cmpName !='' ">
+				and cmpname like '%${cmpName}%'
+			</if>
+			and (deleteflag is null or  deleteflag = 0 	)
+		</where>
+	</select>
+	
+	<select id="selectCurPageCmp" parameterType ="com.web.entity.dto.CompanyMainDto" 
+	resultType = "com.web.entity.CompanyMst">
+		select * from 
+			(select	cmpid,cmpname,
+					nvl(contacts, ' ')  contacts,
+					nvl(tel, ' ')  tel,
+					nvl(fax, ' ')  fax,
+					nvl(address, ' ') address,
+					deleteflag ,
+			     row_number() over(order by cmpid) rcnt
+				from tblCompanyMst
+				<where>
+					<if test="cmpId != null and  cmpId !='' ">
+						and cmpid = #{cmpId}
+					</if>
+					<if test="cmpName != null and  cmpName !='' ">
+						and cmpname like '%${cmpName}%'
+					</if>
+					and (deleteflag is null or  deleteflag = 0 	)
+				</where>
+			 )
+		<!--  <![CDATA[where rcnt >= ${beginIndex} and rcnt <= ${endIndex}]]>  -->
+		
+	</select>
+</mapper>

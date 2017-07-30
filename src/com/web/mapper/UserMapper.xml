@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.web.dao.UserMapper">
+
+  <select id="selectUserById" resultType="int">
+  	select count(*) from employees
+  </select>
+  
+  <select id="selectUserByUserId" parameterType="com.web.entity.User" 
+  	resultType="com.web.entity.User">
+  	select  ucid,
+			cmpid,
+			userid,
+			username,
+			userpassword,
+			usergroupid,
+			tel,
+			email,
+			inputauthority,
+			approveauthority,
+			infoauthority,
+			deleteflag
+	 from tblUser
+	 where  cmpid = #{cmpid}
+	   and userid = #{userid}
+  </select>
+  
+</mapper>

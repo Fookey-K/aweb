@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+		                http://www.springframework.org/schema/context 
+			            http://www.springframework.org/schema/context/spring-context.xsd
+			            http://www.springframework.org/schema/aop 
+			            http://www.springframework.org/schema/aop/spring-aop.xsd 
+			            http://www.springframework.org/schema/tx 
+			            http://www.springframework.org/schema/tx/spring-tx.xsd
+			            http://www.springframework.org/schema/task 
+			            http://www.springframework.org/schema/task/spring-task.xsd" >
+
+	<!-- 扫描service -->
+   <context:component-scan base-package="com.web.service"></context:component-scan>
+   <!-- 启用aop注解 -->
+   <aop:aspectj-autoproxy ></aop:aspectj-autoproxy>
+   
+   <!-- 定义datasource -->
+   <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+	   	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property>
+	   	<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"></property>
+	   	<property name="username" value="hr"></property>
+	   	<property name="password" value="hr"></property> 
+	   	
+	   	<!-- <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+	   	<property name="url" value="jdbc:mysql://127.0.0.1:3306/erp?characterEncoding=utf-8"></property>
+	   	<property name="username" value="root"></property>
+	   	<property name="password" value="root"></property>  -->
+   </bean>
+   
+   <!-- mybatis相关的 -->
+   <bean id="sqlSesssionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">	
+   	<property name="dataSource" ref="dataSource"></property>
+   	<property name="mapperLocations" value="classpath*:com/web/mapper/*.xml"></property>
+   </bean>
+   
+   <bean id="mapScnner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.web.dao"></property>
+   	<property name="sqlSessionFactory" ref="sqlSesssionFactory"></property>
+   </bean>
+   
+   <!-- 事务管理器 -->
+   <bean id="txManage" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+   		<property name="dataSource" ref="dataSource"></property>
+   </bean>
+   <!-- 启用事务注解 -->
+   <tx:annotation-driven transaction-manager="txManage"/>
+      <!-- 方式一   begin  CronTriggerFactoryBean和 SimpleTriggerFactoryBean都可以-->
+  <!--     
+  <bean id="job1" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+   		<property name="jobClass" value="com.web.scheduling.ScheduleTaskS"></property>
+   		<property name="jobDataAsMap">
+   			<map> 
+   				<entry key="timeout" value="0" /> 
+   			</map>   
+   		</property>
+   </bean>
+   
+   <bean id="cronTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+	 	<property name="jobDetail" ref="job1" /> 
+	 	<property name="startDelay" value="0"></property>
+	 	<property name="repeatInterval" value="2000"></property>    
+	</bean>
+
+	<bean id="" class = "org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="cronTrigger"/>
+			</list>
+		</property>
+		<property name="autoStartup" value="true"></property>
+	</bean>
+    -->
+     <!-- 方式一   end -->
+     
+    <!-- 方式二 begin  CronTriggerFactoryBean和 SimpleTriggerFactoryBean都可以 -->
+   <!-- <bean id="scheduledTask11" class="com.web.scheduling.ScheduledTask"> </bean> 
+   <bean id="job2"  
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+		<property name="targetBeanName" value="scheduledTask11" />  
+		<property name="targetMethod" value="printInfo" />  
+		<property name="concurrent" value="false" />
+	</bean>   
+	
+	 <bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	 	<property name="jobDetail" ref="job2" /> 
+	 	<property name="startDelay" value="0"></property>
+	 	<property name="cronExpression" value="0/5 * * * * ?"></property>    
+	</bean>  
+
+
+	<bean id="" class = "org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="cronTrigger"/>
+			</list>
+		</property>
+		<property name="autoStartup" value="true"></property>
+	</bean>
+   -->
+   
+    <!-- 方式二 end -->
+   
+   <!-- 方式三 begin -->
+   <bean id="job3" class="com.web.scheduling.ScheduledTask"> </bean>
+   <task:scheduled-tasks>
+   		<task:scheduled ref="job3" method="printInfo" cron="0/5 * * * * ?"/>
+   </task:scheduled-tasks>  
+   
+	<!-- 方式三 end -->
+</beans>
